@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diymall.mapper.CartMapper">
+
+
+    <!-- 회원의 장바구니 조회 -->
+    <select id="selectCartByMemberId"
+            parameterType="int"
+            resultType="com.diymall.dto.CartDTO">
+
+        SELECT
+            CART_ID,
+            MEMBER_ID,
+            CREATED_AT
+        FROM CART
+        WHERE MEMBER_ID = #{memberId}
+
+    </select>
+
+
+    <!-- 장바구니 생성 -->
+    <insert id="insertCart"
+        parameterType="com.diymall.dto.CartDTO">
+	
+	    INSERT INTO CART
+	    (
+	        CART_ID,
+	        MEMBER_ID
+	    )
+	    VALUES
+	    (
+	        CART_SEQ.NEXTVAL,
+	        #{memberId}
+	    )
+	
+	</insert>
+
+
+    <!-- 장바구니 상품 추가 -->
+    <insert id="insertCartItem"
+        parameterType="com.diymall.dto.CartItemDTO">
+	
+	    INSERT INTO CART_ITEM
+	    (
+	        CART_ITEM_ID,
+	        CART_ID,
+	        PRODUCT_ID,
+	        QUANTITY
+	    )
+	    VALUES
+	    (
+	        CART_ITEM_SEQ.NEXTVAL,
+	        #{cartId},
+	        #{productId},
+	        #{quantity}
+	    )
+	
+	</insert>
+
+
+    <!-- 이미 담긴 상품인지 확인 -->
+    <select id="selectCartItem"
+        resultType="com.diymall.dto.CartItemDTO">
+	
+	    SELECT
+	        CART_ITEM_ID,
+	        CART_ID,
+	        PRODUCT_ID,
+	        QUANTITY
+	    FROM CART_ITEM
+	    WHERE CART_ID = #{cartId}
+	      AND PRODUCT_ID = #{productId}
+	
+	</select>
+
+
+    <!-- 수량 변경 -->
+    <update id="updateCartItemQuantity">
+
+        UPDATE CART_ITEM
+        SET QUANTITY = #{quantity}
+        WHERE CART_ITEM_ID = #{cartItemId}
+
+    </update>
+
+
+    <!-- 장바구니 목록 -->
+    <select id="selectCartItems"
+        parameterType="int"
+        resultType="com.diymall.dto.CartItemDTO">
+	
+	    SELECT
+	        CI.CART_ITEM_ID,
+	        CI.CART_ID,
+	        CI.PRODUCT_ID,
+	        CI.QUANTITY,
+	        P.PRODUCT_NAME,
+	        P.PRICE,
+	        P.IMAGE,
+	        P.STOCK
+	    FROM CART_ITEM CI
+	    JOIN PRODUCT P
+	      ON CI.PRODUCT_ID = P.PRODUCT_ID
+	    WHERE CI.CART_ID = #{cartId}
+	    ORDER BY CI.CART_ITEM_ID
+	
+	</select>
+
+
+    <!-- 장바구니 상품 삭제 -->
+    <delete id="deleteCartItem"
+            parameterType="int">
+
+        DELETE FROM CART_ITEM
+        WHERE CART_ITEM_ID = #{cartItemId}
+
+    </delete>
+
+</mapper>
