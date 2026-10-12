@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diymall.mapper.OrderMapper">
+
+    <!--
+        주문 기본 정보 저장
+        ORDERS_SEQ에서 주문 번호를 먼저 발급받는다.
+    -->
+    <insert id="insertOrder"
+            parameterType="com.diymall.dto.OrderDTO">
+
+        <selectKey
+            keyProperty="orderId"
+            resultType="int"
+            order="BEFORE">
+
+            SELECT ORDERS_SEQ.NEXTVAL
+            FROM DUAL
+
+        </selectKey>
+
+        INSERT INTO ORDERS
+        (
+            ORDER_ID,
+            MEMBER_ID,
+            TOTAL_PRICE,
+            ORDER_STATUS
+        )
+        VALUES
+        (
+            #{orderId},
+            #{memberId},
+            #{totalPrice},
+            #{orderStatus}
+        )
+
+    </insert>
+
+
+    <!--
+        주문 상품 정보 저장
+        하나의 주문에 여러 상품이 들어갈 수 있다.
+    -->
+    <insert id="insertOrderItem"
+            parameterType="com.diymall.dto.OrderItemDTO">
+
+        <selectKey
+            keyProperty="orderItemId"
+            resultType="int"
+            order="BEFORE">
+
+            SELECT ORDER_ITEM_SEQ.NEXTVAL
+            FROM DUAL
+
+        </selectKey>
+
+        INSERT INTO ORDER_ITEM
+        (
+            ORDER_ITEM_ID,
+            ORDER_ID,
+            PRODUCT_ID,
+            QUANTITY,
+            PRICE
+        )
+        VALUES
+        (
+            #{orderItemId},
+            #{orderId},
+            #{productId},
+            #{quantity},
+            #{price}
+        )
+
+    </insert>
+
+
+    <!-- 주문 기본 정보 조회 -->
+    <select id="selectOrderById"
+            parameterType="int"
+            resultType="com.diymall.dto.OrderDTO">
+
+        SELECT
+            ORDER_ID,
+            MEMBER_ID,
+            TOTAL_PRICE,
+            ORDER_STATUS,
+            CREATED_AT
+        FROM ORDERS
+        WHERE ORDER_ID = #{orderId}
+
+    </select>
+
+
+    <!-- 주문 상품 목록 조회 -->
+    <select id="selectOrderItems"
+            parameterType="int"
+            resultType="com.diymall.dto.OrderItemDTO">
+
+        SELECT
+            OI.ORDER_ITEM_ID,
+            OI.ORDER_ID,
+            OI.PRODUCT_ID,
+            OI.QUANTITY,
+            OI.PRICE,
+            P.PRODUCT_NAME,
+            P.IMAGE
+        FROM ORDER_ITEM OI
+        JOIN PRODUCT P
+          ON OI.PRODUCT_ID = P.PRODUCT_ID
+        WHERE OI.ORDER_ID = #{orderId}
+        ORDER BY OI.ORDER_ITEM_ID
+
+    </select>
+
+	<select id="selectOrderList"
+	        resultType="com.diymall.dto.OrderDTO">
+	
+	    SELECT
+	        O.ORDER_ID,
+	        O.MEMBER_ID,
+	        O.TOTAL_PRICE,
+	        O.ORDER_STATUS,
+	        O.CREATED_AT,
+	        M.USER_ID,
+	        M.NAME
+	    FROM ORDERS O
+	    JOIN MEMBER M
+	        ON O.MEMBER_ID = M.MEMBER_ID
+	    ORDER BY O.CREATED_AT DESC
+	
+	</select>
+	
+	
+	<select id="selectOrderDetail"
+	        parameterType="int"
+	        resultType="com.diymall.dto.OrderDTO">
+	
+	    SELECT
+	        O.ORDER_ID,
+	        O.MEMBER_ID,
+	        O.TOTAL_PRICE,
+	        O.ORDER_STATUS,
+	        O.CREATED_AT,
+	        M.USER_ID,
+	        M.NAME
+	    FROM ORDERS O
+	    JOIN MEMBER M
+	        ON O.MEMBER_ID = M.MEMBER_ID
+	    WHERE O.ORDER_ID = #{orderId}
+	
+	</select>
+	
+	
+	<update id="updateOrderStatus"
+	        parameterType="com.diymall.dto.OrderDTO">
+	
+	    UPDATE ORDERS
+	    SET ORDER_STATUS = #{orderStatus}
+	    WHERE ORDER_ID = #{orderId}
+	
+	</update>
+	
+	<select id="selectOrderListByMemberId"
+        parameterType="int"
+        resultType="com.diymall.dto.OrderDTO">
+
+	    SELECT
+	        ORDER_ID,
+	        MEMBER_ID,
+	        TOTAL_PRICE,
+	        ORDER_STATUS,
+	        CREATED_AT
+	    FROM ORDERS
+	    WHERE MEMBER_ID = #{memberId}
+	    ORDER BY CREATED_AT DESC
+
+	</select>
+	
+	
+	<select id="selectOrderDetailByMemberId"
+	        parameterType="map"
+	        resultType="com.diymall.dto.OrderDTO">
+	
+	    SELECT
+	        ORDER_ID,
+	        MEMBER_ID,
+	        TOTAL_PRICE,
+	        ORDER_STATUS,
+	        CREATED_AT
+	    FROM ORDERS
+	    WHERE ORDER_ID = #{orderId}
+	      AND MEMBER_ID = #{memberId}
+	
+	</select>
+</mapper>

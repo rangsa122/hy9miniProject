@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diymall.mapper.ReviewMapper">
+
+    <!-- 리뷰 등록 -->
+    <insert id="insertReview"
+            parameterType="com.diymall.dto.ReviewDTO">
+
+        <selectKey
+            keyProperty="reviewId"
+            resultType="int"
+            order="BEFORE">
+
+            SELECT REVIEW_SEQ.NEXTVAL
+            FROM DUAL
+
+        </selectKey>
+
+        INSERT INTO REVIEW
+        (
+            REVIEW_ID,
+            MEMBER_ID,
+            PRODUCT_ID,
+            CONTENT
+        )
+        VALUES
+        (
+            #{reviewId},
+            #{memberId},
+            #{productId},
+            #{content}
+        )
+
+    </insert>
+
+
+    <!-- 상품별 리뷰 조회 -->
+    <select id="selectReviewsByProductId"
+            parameterType="int"
+            resultType="com.diymall.dto.ReviewDTO">
+
+        SELECT
+            R.REVIEW_ID,
+            R.MEMBER_ID,
+            R.PRODUCT_ID,
+            R.CONTENT,
+            R.CREATED_AT,
+            M.NAME AS MEMBER_NAME,
+            P.PRODUCT_NAME
+        FROM REVIEW R
+        JOIN MEMBER M
+          ON R.MEMBER_ID = M.MEMBER_ID
+        JOIN PRODUCT P
+          ON R.PRODUCT_ID = P.PRODUCT_ID
+        WHERE R.PRODUCT_ID = #{productId}
+        ORDER BY R.REVIEW_ID DESC
+
+    </select>
+
+
+    <!-- 리뷰 하나 조회 -->
+    <select id="selectReviewById"
+            parameterType="int"
+            resultType="com.diymall.dto.ReviewDTO">
+
+        SELECT
+            R.REVIEW_ID,
+            R.MEMBER_ID,
+            R.PRODUCT_ID,
+            R.CONTENT,
+            R.CREATED_AT,
+            M.NAME AS MEMBER_NAME,
+            P.PRODUCT_NAME
+        FROM REVIEW R
+        JOIN MEMBER M
+          ON R.MEMBER_ID = M.MEMBER_ID
+        JOIN PRODUCT P
+          ON R.PRODUCT_ID = P.PRODUCT_ID
+        WHERE R.REVIEW_ID = #{reviewId}
+
+    </select>
+
+
+    <!-- 리뷰 삭제 -->
+    <delete id="deleteReview"
+            parameterType="int">
+
+        DELETE FROM REVIEW
+        WHERE REVIEW_ID = #{reviewId}
+
+    </delete>
+
+</mapper>
